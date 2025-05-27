@@ -1,0 +1,243 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "geodaedalus"
+version = "0.1.0"
+description = "An academic multi-agent system for automated geoscience literature search and data aggregation"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [
+    { name = "GeoDaedalus Team" }
+]
+maintainers = [
+    { name = "GeoDaedalus Team" }
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Text Processing :: Linguistic",
+]
+requires-python = ">=3.11"
+dependencies = [
+    # Core dependencies
+    "pydantic>=2.5.0",
+    "pydantic-settings>=2.1.0",
+    "typing-extensions>=4.8.0",
+    
+    # Async and HTTP
+    "httpx>=0.25.0",
+    "aiohttp>=3.9.0",
+    "aiofiles>=23.2.0",
+    
+    # LLM and AI
+    "openai>=1.12.0",
+    "anthropic>=0.18.0",
+    "tiktoken>=0.6.0",
+    
+    # Document processing
+    "pdfminer.six>=20221105",
+    "pypdf>=4.0.0",
+    "beautifulsoup4>=4.12.0",
+    "lxml>=4.9.0",
+    "markdown>=3.5.0",
+    
+    # Data processing
+    "pandas>=2.1.0",
+    "numpy>=1.24.0",
+    "jsonschema>=4.20.0",
+    
+    # Search and retrieval
+    "google-search-results>=2.4.2",
+    "serpapi>=0.1.5",
+    "scholarly>=1.7.11",
+    
+    # Logging and monitoring
+    "structlog>=23.2.0",
+    "rich>=13.7.0",
+    "loguru>=0.7.2",
+    
+    # CLI and UI
+    "typer>=0.9.0",
+    "rich-click>=1.7.0",
+    "tqdm>=4.66.0",
+    
+    # Configuration
+    "python-dotenv>=1.0.0",
+    "toml>=0.10.2",
+    
+    # Testing utilities
+    "tenacity>=8.2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    # Testing
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+    "pytest-xdist>=3.5.0",
+    "factory-boy>=3.3.0",
+    
+    # Code quality
+    "ruff>=0.1.8",
+    "black>=23.12.0",
+    "isort>=5.13.0",
+    "mypy>=1.8.0",
+    "pre-commit>=3.6.0",
+    
+    # Documentation
+    "mkdocs>=1.5.0",
+    "mkdocs-material>=9.5.0",
+    "mkdocstrings[python]>=0.24.0",
+    
+    # Development tools
+    "ipython>=8.18.0",
+    "jupyter>=1.0.0",
+    "notebook>=7.0.0",
+]
+
+benchmark = [
+    # Benchmark-specific dependencies
+    "datasets>=2.16.0",
+    "huggingface-hub>=0.20.0",
+    "evaluate>=0.4.1",
+    "scikit-learn>=1.3.0",
+    "matplotlib>=3.8.0",
+    "seaborn>=0.13.0",
+    "plotly>=5.17.0",
+]
+
+all = [
+    "geodaedalus[dev,benchmark]"
+]
+
+[project.scripts]
+geodaedalus = "geodaedalus.cli.main:app"
+geo-bench = "geodaedalus.benchmark.cli:benchmark_app"
+
+[project.urls]
+Homepage = "https://github.com/your-org/geodaedalus"
+Documentation = "https://geodaedalus.readthedocs.io"
+Repository = "https://github.com/your-org/geodaedalus.git"
+"Bug Tracker" = "https://github.com/your-org/geodaedalus/issues"
+
+[tool.uv]
+dev-dependencies = [
+    "geodaedalus[dev]"
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "C",   # flake8-comprehensions
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+    "N",   # pep8-naming
+    "S",   # bandit
+    "T20", # flake8-print
+    "PT",  # flake8-pytest-style
+    "RET", # flake8-return
+    "SIM", # flake8-simplify
+    "TID", # flake8-tidy-imports
+    "ARG", # flake8-unused-arguments
+    "ERA", # eradicate
+]
+ignore = [
+    "E501",  # line too long
+    "S101",  # assert used
+    "T201",  # print found
+]
+
+[tool.ruff.per-file-ignores]
+"tests/*" = ["S101", "ARG001", "PLR2004"]
+"scripts/*" = ["T201"]
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
+include = '\.pyi?$'
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = [
+    "serpapi.*",
+    "scholarly.*",
+    "google.*",
+    "pdfminer.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+    "--cov=geodaedalus",
+    "--cov-report=term-missing",
+    "--cov-report=xml",
+    "--cov-report=html",
+]
+testpaths = ["tests"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+    "benchmark: marks tests as benchmark tests",
+]
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+source = ["geodaedalus"]
+omit = [
+    "*/tests/*",
+    "*/migrations/*",
+    "*/venv/*",
+    "*/.venv/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+] 
