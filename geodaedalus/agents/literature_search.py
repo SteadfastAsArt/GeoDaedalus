@@ -151,6 +151,7 @@ class LiteratureSearchAgent(BaseAgent[GeoscientificConstraints, SearchResults]):
             max_results: int
     ) -> List[LiteraturePaper]:
         """Search a specific academic search engine."""
+        # TODO: add search engine info
         if engine == SearchEngine.SEMANTIC_SCHOLAR:
             return await self._search_semantic_scholar(queries, max_results)
         elif engine == SearchEngine.GOOGLE_SCHOLAR:
@@ -164,6 +165,7 @@ class LiteratureSearchAgent(BaseAgent[GeoscientificConstraints, SearchResults]):
         papers = []
 
         for query in queries:
+            # ref: https://api.semanticscholar.org/api-docs/#tag/Paper-Data/operation/get_graph_paper_relevance_search
             try:
                 params = {
                     "query": query,
@@ -201,6 +203,7 @@ class LiteratureSearchAgent(BaseAgent[GeoscientificConstraints, SearchResults]):
         papers = []
 
         for query in queries:
+            # ref: https://serpapi.com/google-scholar-api
             try:
                 params = {
                     "engine": "google_scholar",
@@ -234,9 +237,16 @@ class LiteratureSearchAgent(BaseAgent[GeoscientificConstraints, SearchResults]):
     def _parse_semantic_scholar_paper(self, data: Dict[str, Any]) -> Optional[LiteraturePaper]:
         """Parse Semantic Scholar paper data."""
         try:
+            # TODO: add other fields like keywords, etc.
             authors = []
             for author_data in data.get("authors", []):
                 authors.append(Author(name=author_data.get("name", "Unknown")))
+
+            pdf_url = None
+            if (data.get("isOpenAccess", False)
+                    and data.get("openAccessPdf", False)
+                    and data.get("openAccessPdf", {}).get("url", False)):
+                pdf_url = data.get("openAccessPdf", {}).get("url", False)
 
             return LiteraturePaper(
                 title=data.get("title", ""),
@@ -246,6 +256,7 @@ class LiteratureSearchAgent(BaseAgent[GeoscientificConstraints, SearchResults]):
                 year=data.get("year"),
                 citation_count=data.get("citationCount"),
                 is_open_access=data.get("isOpenAccess", False),
+                pdf_url=pdf_url,
                 web_url=data.get("url"),
                 keywords=[]
             )
@@ -256,19 +267,30 @@ class LiteratureSearchAgent(BaseAgent[GeoscientificConstraints, SearchResults]):
     def _parse_google_scholar_paper(self, data: Dict[str, Any]) -> Optional[LiteraturePaper]:
         """Parse Google Scholar paper data."""
         try:
+            # ref: https://serpapi.com/google-scholar-organic-results
+
             # Extract authors from publication info
             authors = []
             publication_info = data.get("publication_info", {})
-            authors_str = publication_info.get("authors", "")
-            if authors_str:
-                author_names = [name.strip() for name in authors_str.split(",")]
+            authors_list = publication_info.get("authors", [])
+            if len(authors_list) > 0:
+                author_names = [au.get("name") for au in authors_list]
                 authors = [Author(name=name) for name in author_names if name]
+
+            # TODO: Extract pdf_url from resources
+            pdf_url = None
+            resources = data.get("resources", [])
+            if len(resources) > 0:
+                resource = resources[0]
+                if resource.get("file_format", None) == "PDF":
+                    pdf_url = resource.get("link", None)
 
             return LiteraturePaper(
                 title=data.get("title", ""),
                 authors=authors,
                 abstract=data.get("snippet"),
                 journal=publication_info.get("summary", "").split(",")[0] if publication_info.get("summary") else None,
+                pdf_url=pdf_url,
                 web_url=data.get("link"),
                 citation_count=data.get("inline_links", {}).get("cited_by", {}).get("total"),
                 keywords=[]
@@ -372,6 +394,7 @@ class LiteratureSearchAgent(BaseAgent[GeoscientificConstraints, SearchResults]):
         
         Return as JSON: {{"scores": [0.8, 0.3, 0.9, ...]}}
         """
+        # TODO: add log
 
         try:
             response = await self.llm_service.generate_response(
