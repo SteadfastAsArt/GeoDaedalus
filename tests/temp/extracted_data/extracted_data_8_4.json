@@ -1,0 +1,19 @@
+{
+  "id": "bca5099c-bcc9-4213-a31e-c52f2b748b53",
+  "query_id": "98489c9d-0713-462d-b176-8e8150eaf8f7",
+  "tables": [],
+  "consolidated_data": {},
+  "source_papers": [],
+  "extraction_summary": {
+    "papers_processed": 0,
+    "tables_extracted": 0,
+    "extraction_methods": [
+      "pdf_text",
+      "html_parsing",
+      "llm_structured"
+    ]
+  },
+  "data_completeness": null,
+  "consistency_score": null,
+  "created_at": "2025-06-20T05:02:21.328506"
+}
